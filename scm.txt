@@ -34,6 +34,8 @@ git push --set-upstream origin main
 
 -- [_] INSTALL FLUTTER SDK.
 
+    -- [_] https://docs.flutter.dev/install
+
 ##################################################
 ## CREATE CONSOLE PROJECT 
 ##################################################
@@ -52,7 +54,7 @@ dart pub get
 
 dart pub outdated 
 
-dart run bin/server.dart
+dart run lib/main.dart
 
 ##################################################
 ## FLUTTER  (NOT APPLY)
@@ -70,7 +72,7 @@ Flutter pub upgrade --dry-run
 ## test output
 ##################################################
 
-curl -i http://localhost:8080/
+curl -i http://localhost:8080/zero
 curl -i http://localhost:8080/health
 curl -i http://localhost:8080/
 

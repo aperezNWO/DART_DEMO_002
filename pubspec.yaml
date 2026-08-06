@@ -1,0 +1,7 @@
+name: dart_zero_endpoint
+description: Minimal Dart backend that serves a 0kb endpoint
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.12.0
