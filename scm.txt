@@ -25,7 +25,7 @@ Note: codespaces-write
 Expiration: 90 days
 Scopes: ✅ repo (the top-level checkbox — this gives full repo access
 
-git remote set-url origin https://aperezNWO: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@github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
+git remote set-url origin https://aperezNWO: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@github.com/aperezNWO/JAVA2_EE_SB_DEMO.git
 git push --set-upstream origin main
 
 ##################################################
