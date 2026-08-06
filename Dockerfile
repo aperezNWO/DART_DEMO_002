@@ -6,7 +6,7 @@ COPY pubspec.* ./
 RUN dart pub get
 
 COPY . .
-RUN dart compile exe lib/main.dart -o bin/server
+RUN dart compile exe bin/server.dart -o bin/server
 
 # --- Stage 2: runtime ---
 FROM scratch
