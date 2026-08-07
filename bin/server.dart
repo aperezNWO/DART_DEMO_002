@@ -1,3 +1,7 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// MS SQL SERVER NOT SUPPORTED BY DART. USE MYSQL OR POSTGRESQL INSTEAD.
+// ─────────────────────────────────────────────────────────────────────────────
+  
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
