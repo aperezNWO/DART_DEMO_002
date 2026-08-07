@@ -4,11 +4,15 @@ version: 1.0.0
 publish_to: 'none'
 
 environment:
-  sdk: ^3.12.0
+  # UPDATED: Tighten the lower bound to ensure compatibility with modern 
+  # features used in the refactored code (e.g., Isolate.run, super-parameters)
+  sdk: ^3.5.0 
+
 dependencies:
-  async: ^2.13.1
+  # async: ^2.13.1 # NOTE: Isolate.run no longer requires this in Dart 2.19+
   convert: ^3.1.2
-  http: ^1.6.0
+  # ADDED: Explicit dependency for dart:io features (HttpStatus) used in server.dart
+  http_parser: ^4.0.2 
   mysql1: ^0.20.0
   shelf: ^1.4.2
   shelf_router: ^1.1.4
