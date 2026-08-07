@@ -50,6 +50,10 @@ dart create -t console dart_zero_endpoint
  
 ## CONSOLE 
 
+dart pub add shelf shelf_router mysql1 convert
+
+dart pub add async
+
 dart pub outdated 
 
 dart pub get   
@@ -72,9 +76,26 @@ Flutter pub upgrade --dry-run
 ## test output
 ##################################################
 
+# Ping endpoint (other window)
 curl -i http://localhost:8080/zero
-curl -i http://localhost:8080/health
-curl -i http://localhost:8080/
+
+# Mandelbrot (default bounds)
+curl -i "http://localhost:8085/api/fractals/generate?kind=1"
+
+# Julia with custom bounds
+curl -i "http://localhost:8085/api/fractals/generate?kind=2&xMin=-1.5&xMax=1.5&yMin=-1.5&yMax=1.5&maxIterations=500"
+
+# Barnsley Fern
+curl -i "http://localhost:8085/api/fractals/generate?kind=3"
+
+## DIJKSTRA
+curl -i http://localhost:8085/GenerateRandomVertex_SpringBoot
+
+## GET ALL PERSONS 
+curl -i http://localhost:8085/api/data/getAllPersons
+
+## GET ALL LOGS 
+curl -i http://localhost:8085/api/data/getAllLogs
 
 
 ##################################################
