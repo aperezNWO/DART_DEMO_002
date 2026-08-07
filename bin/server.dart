@@ -10,8 +10,8 @@ Future<void> main() async {
     switch (request.uri.path) {
       case '/api/fractal/leaf':
         request.response.statusCode = HttpStatus.ok;
-        request.response.write('barnsley fern fractal');
-        await request.response.close();
+        request.response.write('Leaf fractal data');
+        await request.response.close(); 
         break;
       case '/zero':
         // Respuesta de 0 bytes: sin body, solo status + headers mínimos
