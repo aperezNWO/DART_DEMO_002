@@ -75,30 +75,97 @@ flutter pub outdated
 Flutter pub upgrade --dry-run 
 
 ##################################################
-## test output
+## test output - git bash
 ##################################################
 
 # Ping endpoint (other window)
 curl -i http://localhost:8080/zero
 
+    HTTP/1.1 204 No Content
+    x-powered-by: Dart with package:shelf
+    access-control-allow-credentials: true
+    access-control-allow-headers: Origin, Content-Type, Accept, Authorization
+    date: Sat, 12 Sep 2026 08:34:31 GMT
+    access-control-allow-origin: *
+    access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+    content-length: 0
+    x-frame-options: SAMEORIGIN
+    content-type: text/plain; charset=utf-8
+
 # Mandelbrot (default bounds)
 curl -i "http://localhost:8080/api/fractals/generate?kind=1"
 
+    [... ,{"x":798.0,"y":599.0,"intensity":1},{"x":799.0,"y":599.0,"intensity":1}]
+
 # Julia with custom bounds
 curl -i "http://localhost:8080/api/fractals/generate?kind=2&xMin=-1.5&xMax=1.5&yMin=-1.5&yMax=1.5&maxIterations=500"
+    
+    [... ,,{"x":797.0,"y":599.0,"intensity":0},{"x":798.0,"y":599.0,"intensity":0},{"x":799.0,"y":599.0,"intensity":0}]
 
 # Barnsley Fern
 curl -i "http://localhost:8080/api/fractals/generate?kind=3"
+    
+    [... ,,{"x":796.0,"y":0.0,"intensity":200},{"x":797.0,"y":0.0,"intensity":200},{"x":798.0,"y":0.0,"intensity":200},{"x":799.0,"y":0.0,"intensity":200}]
 
 ## DIJKSTRA
 curl -i http://localhost:8080/GenerateRandomVertex_SpringBoot
 
-## GET ALL PERSONS 
+    HTTP/1.1 200 OK
+    x-powered-by: Dart with package:shelf
+    access-control-allow-credentials: true
+    access-control-allow-headers: Origin, Content-Type, Accept, Authorization
+    date: Sat, 12 Sep 2026 08:36:38 GMT
+    access-control-allow-origin: *
+    access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+    content-length: 541
+    x-frame-options: SAMEORIGIN
+    content-type: text/plain; charset=utf-8
+    x-xss-protection: 1; mode=block
+    x-content-type-options: nosniff
+
+    [21,17]|[6,18]|[19,14]|[7,10]|[2,15]|[16,8]|[13,5]|[11,6]|[18,13]■{0,15,3,15,19,10,0,0,0}|{15,0,0,8,0,0,0,0,0}|{3,0,0,12,0,6,10,0,1}|{15,8,12,0,7,0,7,5,11}|{19,0,0,7,0,0,0,12,16}|{10,0,6,0,0,0,0,5,5}|{0,0,10,7,0,0,0,0,9}|{0,0,0,5,12,5,0,0,9}|{0,0,1,11,16,5,9,9,0}■00<[21;17]>-00-<br/>01<[6;18]>-15-[0;1]≡<br/>02<[19;14]>-03-[0;2]≡<br/>03<[7;10]>-15-[0;3]≡<br/>04<[2;15]>-19-[0;4]≡<br/>05<[16;8]>-09-[0;2]≡[2;5]≡<br/>06<[13;5]>-13-[0;2]≡[2;6]≡<br/>07<[11;6]>-13-[0;2]≡[2;8]≡[8;7]≡<br/>08<[18;13]>-04-[0;2]≡[2;8]≡
+
+## GET ALL PERSONS (ms sql not supported by dart)
 curl -i http://localhost:8080/api/data/getAllPersons
 
-## GET ALL LOGS 
-curl -i http://localhost:8085/api/data/getAllLogs
+## GET ALL LOGS (ms sql not supported by dart)
+curl -i http://localhost:8080/api/data/getAllLogs
 
+## GET LANG VERSION
+curl -i http://localhost:8080/api/system/language-version
+
+    HTTP/1.1 200 OK
+    x-powered-by: Dart with package:shelf
+    access-control-allow-credentials: true
+    access-control-allow-headers: Origin, Content-Type, Accept, Authorization
+    date: Sat, 12 Sep 2026 08:50:49 GMT
+    access-control-allow-origin: *
+    access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+    content-length: 98
+    x-frame-options: SAMEORIGIN
+    content-type: application/json
+    x-xss-protection: 1; mode=block
+    x-content-type-options: nosniff
+
+    {"language":"Dart","version":"3.12.2 (stable) (Tue Jun 9 01:11:39 2026 -0700) on \"windows_x64\""}
+
+## GET WEB SERVER VERSION
+curl -i http://localhost:8080/api/system/server-version
+
+    HTTP/1.1 200 OK
+    x-powered-by: Dart with package:shelf
+    access-control-allow-credentials: true
+    access-control-allow-headers: Origin, Content-Type, Accept, Authorization
+    date: Sat, 12 Sep 2026 08:56:17 GMT
+    access-control-allow-origin: *
+    access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+    content-length: 49
+    x-frame-options: SAMEORIGIN
+    content-type: application/json
+    x-xss-protection: 1; mode=block
+    x-content-type-options: nosniff
+
+    {"server":"Shelf Dart Backend","version":"1.4.2"}
 
 ##################################################
 ## DOCKER
@@ -106,31 +173,59 @@ curl -i http://localhost:8085/api/data/getAllLogs
 
 # docker must be installed on desktop. it was from codespaces, only visual studio code extensions was installed
 # dot included !!!
-1) docker build -t dart-zero-endpoint .
+    docker build -t dart-zero-endpoint .
 
 # list images built / test 
-2.1) docker image ls 
-2.2) docker run -p 8080:8080 -e PORT=8080 dart-zero-endpoint
-(cmd/java)
-2.3) curl -i http://localhost:8080/zero
-2.4) curl -i http://localhost:8080/health
+    docker image ls 
+
+# (optional) run image locally
+    docker run -p 8080:8080 -e PORT=8080 dart-zero-endpoint
 
 # create a tag previous to publish
-3) docker tag dart-zero-endpoint:latest apereznwogmail/dart-zero-endpoint:latest
+3)  docker tag dart-zero-endpoint:latest apereznwogmail/dart-zero-endpoint:latest
 
-# log into docker for publish
-# get PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
-## must return 'Login Succeeded'
-# 4) echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
-docker login
+## log into docker for publish
+    ## RUN THIS FROM CODESPACES
+        get PAT from https://app.docker.com/accounts/apereznwogmail/settings/personal-access-tokens
+        echo "YOUR_PAT_HERE" | docker login --username apereznwogmail --password-stdin
+    ## RUN THIS FROM LOCAL MACHINE WITH DOCKER INSTALLED AND RUNNING
+        docker login
+    ## must return 'Login Succeeded' on both cases
 
 # publish in docker hub
 # https://hub.docker.com/
-5) docker push apereznwogmail/dart-zero-endpoint:latest 
+  docker push apereznwogmail/dart-zero-endpoint:latest 
 
-# URL FOR RENDER : https://dashboard.render.com/
-6) docker.io/apereznwogmail/dart-zero-endpoint:latest
+## clear disk space ==> codespaces
 
+  # This removes all stopped containers, unused networks, and dangling images
+  docker system prune -a --volumes -f
+
+  # This clears out hidden build caches (crucial for freeing up space)
+  docker builder prune -a -f
+
+  # Check disk space (outside visual studio code ==> command line)
+  dir c:
+  38 dirs   6.217.875.456 bytes libres
+
+///////////////////////////////////////////////////////////////////////////////
+// REMOTE SETUP
+///////////////////////////////////////////////////////////////////////////////
+
+## URL FOR RENDER : https://dashboard.render.com/
+## Deploy latest reference
+  docker.io/apereznwogmail/dart-zero-endpoint:latest
+
+## REMOTE TESTING
+    https://dart-zero-endpoint-latest.onrender.com//api/system/language-version
+    {"language":"Dart","version":"3.13.3 (stable) (Tue Sep 1 01:07:17 2026 -0700) on \"linux_x64\""}
+
+    https://dart-zero-endpoint-latest.onrender.com/api/system/server-version
+    {"server":"Shelf Dart Backend","version":"1.4.2"}
+
+## CHRON JOB ==> https://console.cron-job.org/jobs
+    https://dart-zero-endpoint-latest.onrender.com/zero
 
 ##################################################
+## RUN GIT UPDATE COMMANDS
 ##################################################

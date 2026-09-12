@@ -9,6 +9,7 @@ import 'dart:isolate';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
+import 'package:yaml/yaml.dart'; // Requires 'yaml' package in pubspec.yaml
 
 // --- Imports from your local lib folder ---
 // Replace 'flutter_appplication_1' with your actual package name from pubspec.yaml
@@ -235,6 +236,42 @@ void main(List<String> args) async {
     
     return Response.ok(
       jsonEncode(personas.map((p) => p.toJson()).toList()),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  // --- Language Version Endpoint ---
+  app.get('/api/system/language-version', (Request request) {
+    return Response.ok(
+      jsonEncode({
+        'language': 'Dart',
+        'version': Platform.version,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
+  Future<String> getShelfVersion() async {
+    try {
+      final lockFile = File('pubspec.lock');
+      if (await lockFile.exists()) {
+        final content = await lockFile.readAsString();
+        final doc = loadYaml(content);
+        return doc['packages']['shelf']['version']?.toString() ?? 'unknown';
+      }
+    } catch (_) {}
+    return 'unknown';
+  }
+
+  // --- Web Server Version Endpoint ---
+  app.get('/api/system/server-version', (Request request) async {
+    final version = await getShelfVersion();
+    
+    return Response.ok(
+      jsonEncode({
+        'server': 'Shelf Dart Backend',
+        'version': version,
+      }),
       headers: {'Content-Type': 'application/json'},
     );
   });

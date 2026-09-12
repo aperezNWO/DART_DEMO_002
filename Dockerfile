@@ -33,6 +33,8 @@ WORKDIR /app
 # Copy the compiled executable from the build stage
 COPY --from=build --chown=appuser:appuser /app/bin/server /app/server
 
+COPY --from=build /app/pubspec.lock ./pubspec.lock
+
 # Expose the port the server listens on
 EXPOSE 8080
 
