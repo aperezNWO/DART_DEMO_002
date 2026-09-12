@@ -229,3 +229,21 @@ curl -i http://localhost:8080/api/system/server-version
 ##################################################
 ## RUN GIT UPDATE COMMANDS
 ##################################################
+
+
+Go to https://github.com/settings/tokens/new (make sure you're logged in as aperezNWO)
+Fill in:
+
+Note: codespaces-write
+Expiration: 90 days
+Scopes: 
+    ✅ repo (the top-level checkbox — this gives full repo access
+    ✅ workflow
+
+git add * 
+git commit -m"Dart Demo - Language and web server languages end points"
+git remote set-url origin https://aperezNWO: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@github.com/aperezNWO/PWA_DEMO_ENV_PROD.git
+git push --set-upstream origin main
+
+
+##################################################
