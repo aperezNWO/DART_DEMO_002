@@ -25,7 +25,7 @@ Note: codespaces-write
 Expiration: 90 days
 Scopes: ✅ repo (the top-level checkbox — this gives full repo access
 
-git remote set-url origin https://aperezNWO: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@github.com/aperezNWO/DART_DEMO_002.git
+git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO/DART_DEMO_002.git
 git push --set-upstream origin main
 
 ##################################################
@@ -242,7 +242,7 @@ Scopes:
 
 git add * 
 git commit -m"Dart Demo - Language and web server languages end points"
-git remote set-url origin https://aperezNWO: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@github.com/aperezNWO/PWA_DEMO_ENV_PROD.git
+git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO/DART_DEMO_002.git
 git push --set-upstream origin main
 
 
