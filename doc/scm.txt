@@ -1,5 +1,5 @@
 ##################################################
-## SCM 
+## SCM
 ##################################################
 
 ##################################################
@@ -29,15 +29,17 @@ git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO
 git push --set-upstream origin main
 
 ##################################################
-## DART / flutter 
+## DART / flutter
 ##################################################
 
 -- [_] INSTALL FLUTTER SDK.
 
-    -- [_] https://docs.flutter.dev/install
+        -- [_] winget install --id=Google.DartSDK -e
+
+        -- [_] https://docs.flutter.dev/install
 
 ##################################################
-## CREATE CONSOLE PROJECT 
+## CREATE CONSOLE PROJECT
 ##################################################
 
 (ORIGINALLY it WAS A FLUTTER PROJECT/ PENDING TO CREATE A CONSOLE PROJECT)
@@ -47,8 +49,8 @@ dart create -t console dart_zero_endpoint
 ##################################################
 ## EXECUTE PROJECT
 ##################################################
- 
-## CONSOLE 
+
+## CONSOLE
 
 dart pub add shelf shelf_router mysql1 convert
 
@@ -56,9 +58,9 @@ dart pub add async
 
 dart pub add http
 
-dart pub outdated 
+dart pub outdated
 
-dart pub get   
+dart pub get
 
 dart run bin/server.dart
 
@@ -66,13 +68,13 @@ dart run bin/server.dart
 ## FLUTTER  (NOT APPLY)
 ##################################################
 
-flutter pub get   
+flutter pub get
 
 flutter run bin/server.dart
 
-flutter pub outdated 
+flutter pub outdated
 
-Flutter pub upgrade --dry-run 
+Flutter pub upgrade --dry-run
 
 ##################################################
 ## test output - git bash
@@ -99,12 +101,12 @@ curl -i "http://localhost:8080/api/fractals/generate?kind=1"
 
 # Julia with custom bounds
 curl -i "http://localhost:8080/api/fractals/generate?kind=2&xMin=-1.5&xMax=1.5&yMin=-1.5&yMax=1.5&maxIterations=500"
-    
+
     [... ,,{"x":797.0,"y":599.0,"intensity":0},{"x":798.0,"y":599.0,"intensity":0},{"x":799.0,"y":599.0,"intensity":0}]
 
 # Barnsley Fern
 curl -i "http://localhost:8080/api/fractals/generate?kind=3"
-    
+
     [... ,,{"x":796.0,"y":0.0,"intensity":200},{"x":797.0,"y":0.0,"intensity":200},{"x":798.0,"y":0.0,"intensity":200},{"x":799.0,"y":0.0,"intensity":200}]
 
 ## DIJKSTRA
@@ -175,8 +177,8 @@ curl -i http://localhost:8080/api/system/server-version
 # dot included !!!
     docker build -t dart-zero-endpoint .
 
-# list images built / test 
-    docker image ls 
+# list images built / test
+    docker image ls
 
 # (optional) run image locally
     docker run -p 8080:8080 -e PORT=8080 dart-zero-endpoint
@@ -194,7 +196,7 @@ curl -i http://localhost:8080/api/system/server-version
 
 # publish in docker hub
 # https://hub.docker.com/
-  docker push apereznwogmail/dart-zero-endpoint:latest 
+  docker push apereznwogmail/dart-zero-endpoint:latest
 
 ## clear disk space ==> codespaces
 
@@ -236,11 +238,11 @@ Fill in:
 
 Note: codespaces-write
 Expiration: 90 days
-Scopes: 
+Scopes:
     ✅ repo (the top-level checkbox — this gives full repo access
     ✅ workflow
 
-git add * 
+git add *
 git commit -m"Dart Demo - Language and web server languages end points"
 git remote set-url origin https://aperezNWO:<YOUR_PAT_HERE>@github.com/aperezNWO/DART_DEMO_002.git
 git push --set-upstream origin main
