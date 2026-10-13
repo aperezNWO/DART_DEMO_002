@@ -80,7 +80,8 @@ class AlgorithmManager {
         if (indexX != indexY && graph[indexX][indexY] == 0) {
           zeroCount++;
           if (zeroCount == vertexSize - 1) {
-            final hipotemuza = getHipotemuza(vertexString, indexX, indexY).toInt();
+            final hipotemuza =
+                getHipotemuza(vertexString, indexX, indexY).toInt();
             graph[indexX][indexY] = hipotemuza;
             graph[indexY][indexX] = hipotemuza;
           }
@@ -92,14 +93,14 @@ class AlgorithmManager {
     StringBuffer sb = StringBuffer();
     for (int indexX = 0; indexX < vertexSize; indexX++) {
       final separator1 = (indexX < vertexSize - 1) ? "|" : "";
-      
+
       // Generate comma-separated values for the row
       String rowValues = "";
       for (int indexY = 0; indexY < vertexSize; indexY++) {
         rowValues += "${graph[indexX][indexY]}";
         if (indexY < vertexSize - 1) rowValues += ",";
       }
-      
+
       sb.write("{$rowValues}$separator1");
     }
     return sb.toString();
@@ -164,15 +165,10 @@ class AlgorithmManager {
   // DIJKSTRA RUNNER
   // ─────────────────────────────────────────────────────────────────────────
 
-  static String dijkstra(
-      List<String> vertex,
-      List<List<int>> graph,
-      int vertexSize,
-      int sampleSize,
-      int sourcePoint) {
-    
+  static String dijkstra(List<String> vertex, List<List<int>> graph,
+      int vertexSize, int sampleSize, int sourcePoint) {
     // Instantiating the top-level private class
-    final gfg = _Gfg(); 
+    final gfg = _Gfg();
     gfg.dijkstra(graph, sourcePoint, vertexSize);
 
     StringBuffer sb = StringBuffer();
@@ -186,30 +182,27 @@ class AlgorithmManager {
 
       // Dart doesn't have String.format(). Using interpolation.
       // Ensures 2-digit zero padding for index and distance
-      sb.write(
-        "${index.toString().padLeft(2, '0')}"
-        "<${vertex[index].replaceAll(",", ";").replaceAll("|", "")}>"
-        "-${gfg.dist[index].toString().padLeft(2, '0')}-"
-        "${gfg.path[index].replaceAll(",", ";")}"
-        "$separator"
-      );
+      sb.write("${index.toString().padLeft(2, '0')}"
+          "<${vertex[index].replaceAll(",", ";").replaceAll("|", "")}>"
+          "-${gfg.dist[index].toString().padLeft(2, '0')}-"
+          "${gfg.path[index].replaceAll(",", ";")}"
+          "$separator");
     }
     return sb.toString();
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// GFG — Dijkstra core (MOVED TO TOP-LEVEL AND SYNTAX FIXED)
+// GFG — Dijkstra core
 // ─────────────────────────────────────────────────────────────────────────
 
-// Renamed with _ prefix to denote it is library-private
 class _Gfg {
   List<int> dist = [];
   List<String> path = [];
 
   void dijkstra(List<List<int>> graph, int src, int vertexSize) {
-    const javaMaxInt = 2147483647; 
-    
+    const javaMaxInt = 2147483647;
+
     dist = List.generate(vertexSize, (_) => javaMaxInt);
     path = List.generate(vertexSize, (_) => "");
 
@@ -234,15 +227,15 @@ class _Gfg {
 
       visited[u] = true;
 
-      // Relax neighbours
+      // Relax neighbours (Null assertions '!' removed here because 'u' is safely non-null)
       for (int v = 0; v < vertexSize; v++) {
-        final weight = graph[u!][v];
+        final weight = graph[u][v];
         // weight > 0 implies edge exists
-        if (!visited[v] && weight > 0 && dist[u!] != javaMaxInt) {
-          final newDist = dist[u!] + weight;
+        if (!visited[v] && weight > 0 && dist[u] != javaMaxInt) {
+          final newDist = dist[u] + weight;
           if (newDist < dist[v]) {
             dist[v] = newDist;
-            previous[v] = u!;
+            previous[v] = u;
           }
         }
       }
@@ -263,9 +256,8 @@ class _Gfg {
       steps.add(cur);
       cur = previous[cur];
     }
-    
-    // FIX: Dart List doesn't have in-place .reverse(). Use .reversed getter.
-    steps = steps.reversed.toList(); 
+
+    steps = steps.reversed.toList();
 
     if (steps.isEmpty || steps.first != src) return ""; // unreachable
 

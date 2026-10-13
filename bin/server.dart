@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // MS SQL SERVER NOT SUPPORTED BY DART. USE MYSQL OR POSTGRESQL INSTEAD.
 // ─────────────────────────────────────────────────────────────────────────────
-  
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -9,10 +9,9 @@ import 'dart:isolate';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
-import 'package:yaml/yaml.dart'; // Requires 'yaml' package in pubspec.yaml
+import 'package:yaml/yaml.dart'; // Requiere el paquete 'yaml' en pubspec.yaml
 
-// --- Imports from your local lib folder ---
-// Replace 'flutter_appplication_1' with your actual package name from pubspec.yaml
+// --- Importaciones de tu carpeta local lib ---
 import 'fractal_engine.dart';
 import 'algorithm_manager.dart';
 import 'access_log_dao.dart';
@@ -20,24 +19,54 @@ import 'personas_dao.dart';
 import 'app_exception.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MIDDLEWARE: CENTRALIZED ERROR HANDLING
+// DICCIONARIO DE ENDPOINTS (Inspirado en C++)
 // ─────────────────────────────────────────────────────────────────────────────
-/// Catches [AppException]s thrown down the pipeline and returns appropriate
-/// JSON HTTP responses. Also catches unexpected fatal errors.
+class EndpointInfo {
+  final String path;
+  final String description;
+
+  const EndpointInfo(this.path, this.description);
+}
+
+final Map<String, EndpointInfo> endpointDictionary = {
+  'HEALTH_ENDPOINT':
+      const EndpointInfo('/health', 'Print all endpoints and a server status '),
+  'PING_ENDPOINT':
+      const EndpointInfo('/zero', 'Quick server verification (Ping)'),
+  'FRACTAL_ENDPOINT': const EndpointInfo('/api/fractals/generate',
+      'Fratacls Genearation (Julia, Mandelbrot, Barnsley Fern)'),
+  'DIJKSTRA_ENDPOINT': const EndpointInfo('/GenerateRandomVertex_Dart',
+      'Generar vértices aleatorios mediante Dijkstra (Isolate)'),
+  'GET_ALL_LOGS_ENDPOINT': const EndpointInfo('/api/data/getAllLogs',
+      'Get the first 100 records from the database' 's application logs  '),
+  'GET_ALL_PERSONS_ENDPOINT': const EndpointInfo(
+      '/api/data/getAllPersons', 'Get a sample list of persons from database'),
+  'LANGUAGE_VERSION_ENDPOINT': const EndpointInfo(
+      '/api/system/language-version', 'Get Dart language version'),
+  'SERVER_VERSION_ENDPOINT': const EndpointInfo(
+      '/api/system/server-version', 'Get Dart HTTP Server version'),
+  'APP_VERSION_ENDPOINT':
+      const EndpointInfo('/api/system/app-version', 'Get Application Version'),
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MIDDLEWARE: MANEJO CENTRALIZADO DE ERRORES
+// ─────────────────────────────────────────────────────────────────────────────
 Middleware createErrorHandlingMiddleware() {
   return (Handler innerHandler) {
     return (Request request) async {
       try {
         return await innerHandler(request);
       } on AppException catch (e) {
-        // Map known domain exceptions to HTTP status codes
         int statusCode = HttpStatus.internalServerError;
-        
-        if (e is ValidationException) statusCode = HttpStatus.badRequest;
-        else if (e is DatabaseException) statusCode = HttpStatus.serviceUnavailable;
-        else if (e is ExternalServiceException) statusCode = HttpStatus.badGateway;
 
-        // Return standardized JSON error structure
+        if (e is ValidationException)
+          statusCode = HttpStatus.badRequest;
+        else if (e is DatabaseException)
+          statusCode = HttpStatus.serviceUnavailable;
+        else if (e is ExternalServiceException)
+          statusCode = HttpStatus.badGateway;
+
         return Response(
           statusCode,
           body: jsonEncode({
@@ -48,15 +77,13 @@ Middleware createErrorHandlingMiddleware() {
           }),
           headers: {'Content-Type': 'application/json'},
         );
-
       } catch (e, stack) {
-        // Catch-all for unexpected programming errors (500)
         print('[FATAL ERROR] $e\n$stack');
         return Response.internalServerError(
           body: jsonEncode({
             'error': {
               'type': 'ServerError',
-              'message': 'An unexpected internal server error occurred.',
+              'message': 'Ocurrió un error interno inesperado en el servidor.',
             }
           }),
           headers: {'Content-Type': 'application/json'},
@@ -67,16 +94,14 @@ Middleware createErrorHandlingMiddleware() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MIDDLEWARE: HTTP REQUEST LOGGING
+// MIDDLEWARE: REGISTRO DE SOLICITUDES HTTP
 // ─────────────────────────────────────────────────────────────────────────────
-/// Emulates SLF4J logging: method, uri, status, and duration.
 Middleware logRequestsToJson() {
   return (Handler innerHandler) {
     return (Request request) async {
       final watch = Stopwatch()..start();
       print('[START] HTTP ${request.method} ${request.requestedUri}');
-      
-      // 'late' ensures it's assigned before finally runs, safely handling scope
+
       late Response response;
       try {
         response = await innerHandler(request);
@@ -84,46 +109,40 @@ Middleware logRequestsToJson() {
       } finally {
         watch.stop();
         print('[END] HTTP ${request.method} ${request.requestedUri} '
-              '-> Status: ${response.statusCode} [Time: ${watch.elapsedMilliseconds}ms]');
+            '-> Estado: ${response.statusCode} [Tiempo: ${watch.elapsedMilliseconds}ms]');
       }
     };
   };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MIDDLEWARE: CORS (CROSS-ORIGIN RESOURCE SHARING)
+// MIDDLEWARE: CORS (INTERCAMBIO DE RECURSOS DE ORIGEN CRUZADO)
 // ─────────────────────────────────────────────────────────────────────────────
-/// Configures headers to allow requests from web browsers.
 Middleware addCorsHeaders() {
   final headers = {
-    // WARNING: In production, replace '*' with your specific Angular frontend URL
-    'Access-Control-Allow-Origin': '*', 
+    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization',
-    // Required if Angular sends credentials (cookies/authorization headers)
-    'Access-Control-Allow-Credentials': 'true', 
+    'Access-Control-Allow-Headers':
+        'Origin, Content-Type, Accept, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
   };
 
   return createMiddleware(
     requestHandler: (Request request) {
-      // Handle browser pre-flight OPTIONS requests
       if (request.method == 'OPTIONS') {
         return Response.ok(null, headers: headers);
       }
-      // Pass other requests through
       return null;
     },
     responseHandler: (Response response) {
-      // Add headers to successful responses
       return response.change(headers: headers);
     },
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ISOLATE WORKER FUNCTION for Dijkstra
+// FUNCIÓN WORKER ISOLATE PARA DIJKSTRA
 // ─────────────────────────────────────────────────────────────────────────────
-/// Runs heavy computation in a separate thread to avoid blocking server.
 String _runDijkstraWorkload(Map<String, dynamic> args) {
   try {
     return AlgorithmManager.generateRandomPoints(
@@ -132,41 +151,72 @@ String _runDijkstraWorkload(Map<String, dynamic> args) {
       args['sourcePoint'],
     );
   } catch (e) {
-    // Wrap generic algorithm errors in a specific exception type
-    throw ExternalServiceException('Algorithm execution failed: $e');
+    throw ExternalServiceException('Falló la ejecución del algoritmo: $e');
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAIN SERVER ENTRY POINT
+// PUNTO DE ENTRADA PRINCIPAL DEL SERVIDOR
 // ─────────────────────────────────────────────────────────────────────────────
 void main(List<String> args) async {
-  // 1. Initialize Data Access Objects and Engine
+  // 1. Inicializar DAOs y Motor
   final fractalEngine = FractalEngine();
   final accessLogDAO = AccessLogDAO();
   final personasDAO = PersonasDAO();
 
-  // 2. Configure Router
+  // 2. Configurar Enrutador
   final app = Router();
 
-  // --- Ping Endpoint ---
-  app.get('/zero', (Request request) {
-    return Response(204); // No Content
+  Future<String> getShelfVersion() async {
+    try {
+      final lockFile = File('pubspec.lock');
+      if (await lockFile.exists()) {
+        final content = await lockFile.readAsString();
+        final doc = loadYaml(content);
+        return doc['packages']['shelf']['version']?.toString() ?? 'desconocido';
+      }
+    } catch (_) {}
+    return 'desconocido';
+  }
+
+  // --- Endpoint Health (Lista todos los endpoints del diccionario) ---
+  app.get(endpointDictionary['HEALTH_ENDPOINT']!.path, (Request request) async {
+    final serverVersion = await getShelfVersion();
+
+    final endpointsList = endpointDictionary.entries.map((entry) {
+      return {
+        'key': entry.key,
+        'path': entry.value.path,
+        'description': entry.value.description,
+      };
+    }).toList();
+
+    return Response.ok(
+      jsonEncode({
+        'server': 'Dart / Shelf -  HTTP Server - v[$serverVersion] Working!',
+        'endpoints': endpointsList,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
   });
 
-  // --- Fractal Generation Endpoint ---
-  app.get('/api/fractals/generate', (Request request) async {
+  // --- Endpoint Ping (/zero) ---
+  app.get(endpointDictionary['PING_ENDPOINT']!.path, (Request request) {
+    return Response(204);
+  });
+
+  // --- Endpoint de Generación de Fractales ---
+  app.get(endpointDictionary['FRACTAL_ENDPOINT']!.path,
+      (Request request) async {
     final params = request.url.queryParameters;
-    
-    // Parse kind, throw ValidationException if bad input
+
     final kindParam = int.tryParse(params['kind'] ?? '');
     if (kindParam == null) {
-      throw ValidationException('Missing or invalid "kind" parameter.');
+      throw ValidationException('Parámetro "kind" faltante o inválido.');
     }
-    
+
     final fractalKind = FractalKind.fromValue(kindParam);
 
-    // Determine bounds
     Bounds defaultBounds = (fractalKind == FractalKind.mandelbrot)
         ? const Bounds(xMin: -2.0, xMax: 1.0, yMin: -1.2, yMax: 1.2)
         : const Bounds(xMin: -1.5, xMax: 1.5, yMin: -1.5, yMax: 1.5);
@@ -183,31 +233,24 @@ void main(List<String> args) async {
 
     int maxIterations = int.tryParse(params['maxIterations'] ?? '') ?? 500;
 
-    // Generate points (FractalEngine methods are now static/pure)
-    List<FractalPoint> points = fractalEngine.getFractal(
-      fractalKind, 
-      bounds, 
-      maxIterations
-    );
-    
-    // Serialize to JSON
+    List<FractalPoint> points =
+        fractalEngine.getFractal(fractalKind, bounds, maxIterations);
+
     final jsonResponse = points.map((p) => p.toJson()).toList();
 
     return Response.ok(
       jsonEncode(jsonResponse),
       headers: {'Content-Type': 'application/json'},
     );
-    // Errors caught by middleware
   });
 
-  // --- Dijkstra Algorithm Endpoint (Async/Isolate) ---
-  app.get('/GenerateRandomVertex_SpringBoot', (Request request) async {
-    // Constants derived from original implementation
+  // --- Endpoint de Algoritmo Dijkstra (Async/Isolate) ---
+  app.get(endpointDictionary['DIJKSTRA_ENDPOINT']!.path,
+      (Request request) async {
     const vertexSize = 9;
-    const sampleSize = 23; 
+    const sampleSize = 23;
     const sourcePoint = 0;
 
-    // Move heavy lifting to background Isolate
     final result = await Isolate.run(() => _runDijkstraWorkload({
           'vertexSize': vertexSize,
           'sampleSize': sampleSize,
@@ -215,33 +258,32 @@ void main(List<String> args) async {
         }));
 
     return Response.ok(result, headers: {'Content-Type': 'text/plain'});
-    // Errors caught by middleware
   });
 
-  // --- Database Data Endpoints ---
-  
-  app.get('/api/data/getAllLogs', (Request request) async {
-    // DAO now throws DatabaseException which is caught by middleware
+  // --- Endpoints de Datos de Base de Datos ---
+  app.get(endpointDictionary['GET_ALL_LOGS_ENDPOINT']!.path,
+      (Request request) async {
     final logs = await accessLogDAO.getAllLogs();
-    
+
     return Response.ok(
       jsonEncode(logs.map((l) => l.toJson()).toList()),
       headers: {'Content-Type': 'application/json'},
     );
   });
 
-  app.get('/api/data/getAllPersons', (Request request) async {
-    // DAO now throws DatabaseException which is caught by middleware
+  app.get(endpointDictionary['GET_ALL_PERSONS_ENDPOINT']!.path,
+      (Request request) async {
     final personas = await personasDAO.getAllPersons();
-    
+
     return Response.ok(
       jsonEncode(personas.map((p) => p.toJson()).toList()),
       headers: {'Content-Type': 'application/json'},
     );
   });
 
-  // --- Language Version Endpoint ---
-  app.get('/api/system/language-version', (Request request) {
+  // --- Endpoint de Versión de Lenguaje ---
+  app.get(endpointDictionary['LANGUAGE_VERSION_ENDPOINT']!.path,
+      (Request request) {
     return Response.ok(
       jsonEncode({
         'language': 'Dart',
@@ -251,50 +293,43 @@ void main(List<String> args) async {
     );
   });
 
-  Future<String> getShelfVersion() async {
-    try {
-      final lockFile = File('pubspec.lock');
-      if (await lockFile.exists()) {
-        final content = await lockFile.readAsString();
-        final doc = loadYaml(content);
-        return doc['packages']['shelf']['version']?.toString() ?? 'unknown';
-      }
-    } catch (_) {}
-    return 'unknown';
-  }
-
-  // --- Web Server Version Endpoint ---
-  app.get('/api/system/server-version', (Request request) async {
+  // --- Endpoint de Versión del Servidor Web ---
+  app.get(endpointDictionary['SERVER_VERSION_ENDPOINT']!.path,
+      (Request request) async {
     final version = await getShelfVersion();
-    
+
     return Response.ok(
       jsonEncode({
-        'server': 'Shelf Dart Backend',
+        'server': 'Dart Shelf Backend',
         'version': version,
       }),
       headers: {'Content-Type': 'application/json'},
     );
   });
 
+  // --- Endpoint de Versión del Aplicativo ---
+  app.get(endpointDictionary['APP_VERSION_ENDPOINT']!.path,
+      (Request request) async {
+    return Response.ok(
+      jsonEncode({
+        'appVersion': '1.0.0',
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+  });
+
   // ─────────────────────────────────────────────────────────────────────────────
-  // 3. Server Setup with Middleware Pipeline
+  // 3. Configuración del Servidor con Tubería de Middleware
   // ─────────────────────────────────────────────────────────────────────────────
-  
-  // Order matters: 
-  // 1. CORS allows request through
-  // 2. Logger times the execution
-  // 3. Error Handler catches failures from logger or handlers
   final handler = const Pipeline()
       .addMiddleware(addCorsHeaders())
       .addMiddleware(logRequestsToJson())
-      .addMiddleware(createErrorHandlingMiddleware()) 
+      .addMiddleware(createErrorHandlingMiddleware())
       .addHandler(app.call);
 
-  // Use PORT environment variable (e.g., from Render/Railway), default to 8080
   final portStr = Platform.environment['PORT'] ?? '8080';
   final port = int.parse(portStr);
-  
-  // Start server
+
   final server = await io.serve(handler, InternetAddress.anyIPv4, port);
-  print('Server listening on port ${server.port}');
+  print('Servidor escuchando en el puerto ${server.port}');
 }

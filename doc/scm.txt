@@ -60,7 +60,12 @@ dart pub add http
 
 dart pub outdated
 
+dart pub upgrade
+
 dart pub get
+
+dart analyze
+## no issues found!
 
 dart run bin/server.dart
 
@@ -168,6 +173,11 @@ curl -i http://localhost:8080/api/system/server-version
     x-content-type-options: nosniff
 
     {"server":"Shelf Dart Backend","version":"1.4.2"}
+
+## PRINT ALL ENDPOINTS
+    (powershell)
+    iwr "http://localhost:8080/health"
+    curl.exe  "http://localhost:8080/health"
 
 ##################################################
 ## DOCKER
